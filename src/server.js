@@ -17,7 +17,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('search', async (msg) => {
-    const results = await Entity.find({ Name: { $regex: `/${msg}/i` } });
+    const results = await Entity.find({ Name: { $regex: new RegExp(msg), $options: 'i' } });
     socket.emit('search', results);
   });
 });

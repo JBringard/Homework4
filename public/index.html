@@ -7,7 +7,7 @@
     <body>
         <form id="form" name="auto-complete-form" action="" method="get">
             Name:
-            <input id="input" type="text" autocomplete="off" onkeyup="keyPressEvent()"/> <br>
+            <input id="input" type="text" autocomplete="off"/> <br>
             <button id="button" onclick="addToDatabase()">Submit</button>
         </form>
         <ul id ="matches"></ul>
@@ -26,23 +26,33 @@
                 }
             }
 
-            function keyPressEvent(){
+            input.addEventListener('keyup', event => {
+                if(input.value === '' && (event.key === 'Backspace' || event.key === 'Delete')){
+                    clearMatches();
+                    return;
+                }
+                else if(event.key === 'Enter' || event.key === 'Shift'){
+                    return;
+                }
                 socket.emit('search', input.value);
-            }
+            });
 
             function outputToScreen(msg){
                 let item = document.createElement('li');
-                item.textContent = msg;
+                item.textContent = msg.Name;
                 matches.appendChild(item);
             }
 
             socket.on('search', function(msg) {
-                while(matches.firstChild){
-                    matches.removeChild(matches.firstChild)
-                }
+                clearMatches();
                 msg.forEach(outputToScreen)
             });
 
+            function clearMatches(){
+                while(matches.firstChild){
+                    matches.removeChild(matches.firstChild)
+                }
+            }
         </script>
     </body>
 </html>
