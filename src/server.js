@@ -1,17 +1,24 @@
 require('dotenv').config();
 const Express = require('express');
+const Mongoose = require('mongoose');
+
 const path = require('path');
 
 const app = Express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-const Mongoose = require('mongoose');
+const Entity = require('../models/entityModel');
 
 app.use('/static', Express.static(path.join(__dirname, '../public')));
 
 io.on('connection', (socket) => {
-  socket.on('chat message', (msg) => {
-    io.emit('chat message', msg);
+  socket.on('submit', async (msg) => {
+    await new Entity({ Name: msg.toString() }).save();
+  });
+
+  socket.on('search', async (msg) => {
+    const results = await Entity.find({ Name: { $regex: `/${msg}/i` } });
+    socket.emit('search', results);
   });
 });
 

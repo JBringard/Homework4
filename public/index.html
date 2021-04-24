@@ -1,41 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Assignment 4</title>
-</head>
-<body>
-<form id ="form" name="auto-complete-form" action="" method="get">
-    Name:
-    <input id ="input" type="text" autocomplete="off" name="auto-complete-form" value="" onkeypress="keyPressEvent()"/> <br>
-    <input id ="button" type="button" name="button" value="Submit" onclick=""/>
-</form>
-<script src="/socket.io/socket.io.js"></script>
+    <head>
+        <meta charset="UTF-8">
+        <title>Assignment 4</title>
+    </head>
+    <body>
+        <form id="form" name="auto-complete-form" action="" method="get">
+            Name:
+            <input id="input" type="text" autocomplete="off" onkeyup="keyPressEvent()"/> <br>
+            <button id="button" onclick="addToDatabase()">Submit</button>
+        </form>
+        <ul id ="matches"></ul>
+        <script src="/socket.io/socket.io.js"></script>
 
-<script>
-    var socket = io();
+        <script>
+            let socket = io();
 
-    var form = document.getElementById('form');
-    var input = document.getElementById('input');
+            let matches = document.getElementById('matches')
+            let input = document.getElementById('input');
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (input.value) {
-            socket.emit('chat message', input.value);
-            input.value = '';
-        }
-    });
+            function addToDatabase(){
+                if (input.value) {
+                    socket.emit('submit', input.value);
+                    input.value = '';
+                }
+            }
 
-    function keyPressEvent(){
+            function keyPressEvent(){
+                socket.emit('search', input.value);
+            }
 
-    }
+            function outputToScreen(msg){
+                let item = document.createElement('li');
+                item.textContent = msg;
+                matches.appendChild(item);
+            }
 
-    socket.on('chat message', function(msg) {
-        var item = document.createElement('li');
-        item.textContent = msg;
-        messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
-    });
-</script>
-</body>
+            socket.on('search', function(msg) {
+                while(matches.firstChild){
+                    matches.removeChild(matches.firstChild)
+                }
+                msg.forEach(outputToScreen)
+            });
+
+        </script>
+    </body>
 </html>
